@@ -31,10 +31,10 @@ npm install -g .
 
 ```bash
 # Check current system status
-msm
+ts
 
 # Real-time monitoring mode (updates every second)
-msm -w seconds
+ts -w
 ```
 
 ## Screenshot
