@@ -17,7 +17,7 @@ Here's a prettier and more intuitive CLI monitoring tool for your Mac! 🚀
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/mac-system-monitor.git
+git clone https://github.com/HaeJinS2/mac-system-monitor.git
 cd mac-system-monitor
 
 # Install dependencies
