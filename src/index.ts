@@ -41,7 +41,7 @@ function getCpuUsage(): Promise<number> {
       const idleDifferences = endMeasure.map((end, i) => end.idle - startMeasure[i].idle);
       const totalDifferences = endMeasure.map((end, i) => end.total - startMeasure[i].total);
 
-      const averageUsage = 100 - (idleDifferences.reduce((acc, idle, i) => 
+      const averageUsage = 100 - (idleDifferences.reduce((acc, idle, i) =>
         acc + (idle / totalDifferences[i]) * 100, 0) / os.cpus().length);
 
       resolve(averageUsage);
@@ -53,7 +53,7 @@ function getMacMemoryInfo(): MacMemoryInfo {
   try {
     const vmStat = execSync('vm_stat').toString();
     const pageSize = 4096;
-    
+
     const metrics: { [key: string]: number } = vmStat.split('\n').reduce((acc, line) => {
       const match = line.match(/^(.+):[\s]+(.+)\.$/);
       if (match) {
@@ -61,16 +61,16 @@ function getMacMemoryInfo(): MacMemoryInfo {
       }
       return acc;
     }, {} as { [key: string]: number });
-    
+
     const total = os.totalmem();
     const free = metrics['Pages free'] || 0;
     const active = metrics['Pages active'] || 0;
     const inactive = metrics['Pages inactive'] || 0;
     const wired = metrics['Pages wired down'] || 0;
-    
+
     const used = wired + active;
     const available = free + inactive;
-    
+
     return {
       total: total / (1024 * 1024 * 1024),
       used: used / (1024 * 1024 * 1024),
@@ -95,7 +95,7 @@ function getBasicMemoryInfo(): BasicMemoryInfo {
   const total = os.totalmem();
   const free = os.freemem();
   const used = total - free;
-  
+
   return {
     total: total / (1024 * 1024 * 1024),
     used: used / (1024 * 1024 * 1024),
@@ -109,7 +109,8 @@ const program = new Command();
 program
   .version('1.0.0')
   .description('System resource monitoring tool')
-  .option('-w, --watch [seconds]', 'Watch mode with custom update interval (default: 1 second)', '1');
+  .option('-w, --watch <seconds>', 'Watch mode with custom update interval in seconds');
+
 
 program
   .action(async (options) => {
@@ -128,7 +129,7 @@ program
       console.log(`Total: ${chalk.yellow(memInfo.total.toFixed(2))} GB`);
       console.log(`Used: ${chalk.yellow(memInfo.used.toFixed(2))} GB (Active)`);
       console.log(`Available: ${chalk.yellow(memInfo.available.toFixed(2))} GB`);
-      
+
       if (isMacMemoryInfo(memInfo)) {
         console.log(`Wired: ${chalk.yellow(memInfo.wired.toFixed(2))} GB (System)`);
         console.log(`Active: ${chalk.yellow(memInfo.active.toFixed(2))} GB (Apps)`);
@@ -148,18 +149,18 @@ program
       }
     };
 
-    if (options.watch) {
-      const interval = parseFloat(options.watch) * 1000; // 초를 밀리초로 변환
+    if (options.watch) {  // watch 옵션이 있을 때만 갱신
+      const interval = parseFloat(options.watch) * 1000;
       if (isNaN(interval) || interval <= 0) {
         console.error(chalk.red('Error: Please provide a valid positive number for the watch interval'));
         process.exit(1);
       }
-      
+
       while (true) {
         await showStats();
         await new Promise(resolve => setTimeout(resolve, interval));
       }
-    } else {
+    } else {  // watch 옵션이 없으면 한 번만 실행
       await showStats();
     }
   });
